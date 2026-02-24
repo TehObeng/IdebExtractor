@@ -283,16 +283,18 @@ def _parse_chunk(chunk: str, nama_debitur: str) -> dict | None:
     is_kartu_kredit = bool(jenis_kredit_match and 'Kartu Kredit' in jenis_kredit_match.group(1))
 
     # --- Agunan (Bukti Kepemilikan + Jenis Agunan) ---
-    agunan_parts = []
+    bukti_items = []
     bukti_matches = re.findall(r'Bukti Kepemilikan\s+(.*?)(?:\s+Nilai|\n)', chunk)
-    agunan_parts.extend(m.strip() for m in bukti_matches if m.strip())
+    bukti_items.extend(m.strip() for m in bukti_matches if m.strip())
+
+    jenis_items = []
     jenis_matches = re.findall(r'Jenis Agunan\s+Nilai Agunan.*?\n\s*(.*?)\s+Rp', chunk)
-    agunan_parts.extend(m.strip() for m in jenis_matches if m.strip())
+    jenis_items.extend(m.strip() for m in jenis_matches if m.strip())
 
     if is_kartu_kredit:
         data["Agunan"] = "Kartu Kredit"
-    elif agunan_parts:
-        data["Agunan"] = " | ".join(agunan_parts)
+    elif bukti_items or jenis_items:
+        data["Agunan"] = _format_agunan_summary(bukti_items, jenis_items)
     else:
         data["Agunan"] = "-"
 
@@ -300,7 +302,53 @@ def _parse_chunk(chunk: str, nama_debitur: str) -> dict | None:
 
 
 # ---------------------------------------------------------------------------
-# 3. Date & Currency Helpers
+# 3. Agunan Summary Helper
+# ---------------------------------------------------------------------------
+
+def _format_agunan_summary(bukti_items: list, jenis_items: list) -> str:
+    """
+    Summarise agunan items for display.
+
+    - Group Bukti Kepemilikan by type prefix (SHM, SHGB, etc.)
+    - Group Jenis Agunan by name (Tanah, Rumah, etc.)
+    - If a group has <= 3 items  → list them
+    - If a group has  > 3 items → just show count, e.g. "6 SHM"
+    """
+    from collections import Counter, defaultdict
+
+    # --- Group Bukti Kepemilikan by type prefix ---
+    bukti_groups: dict[str, list[str]] = defaultdict(list)
+    for item in bukti_items:
+        # Extract type prefix: "SHM NO 7880" → "SHM", "SHGB.9240" → "SHGB"
+        type_match = re.match(r'(SHM|SHGB|SKHMT|AJB|BPKB|PPJB|IMB|SIPPT)\b', item, re.IGNORECASE)
+        type_key = type_match.group(1).upper() if type_match else "Lainnya"
+        bukti_groups[type_key].append(item)
+
+    # --- Count Jenis Agunan ---
+    jenis_counts = Counter(jenis_items)
+
+    # --- Format output ---
+    parts = []
+
+    # Bukti Kepemilikan groups
+    for type_key, items in bukti_groups.items():
+        if len(items) <= 3:
+            parts.append(", ".join(items))
+        else:
+            parts.append(f"{len(items)} {type_key}")
+
+    # Jenis Agunan groups
+    for jenis, count in jenis_counts.items():
+        if count <= 3:
+            parts.append(jenis if count == 1 else f"{jenis} ({count})")
+        else:
+            parts.append(f"{count} {jenis}")
+
+    return " | ".join(parts) if parts else "-"
+
+
+# ---------------------------------------------------------------------------
+# 4. Date & Currency Helpers
 # ---------------------------------------------------------------------------
 
 # Indonesian month name -> number mapping

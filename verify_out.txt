@@ -22,7 +22,7 @@
 
 === YAYASAN IDEB 255.pdf (4 facilities) ===
   [0] Pelapor: 114 - PT BPD Jawa Timur
-       Fasilitas=Investasi | Kol=1 | Agunan=SHM NO 02973 TGL 01 09 2010 AN | SHM NO 00680 TGL 25 03 2004 AN | SHM NO 03999 TGL 30 04 2013 AN | SHM NO 00585 NO 00586 TGL 24 03 | SHM NO 01796 TGL 04 10 2007 AN | SHGB NO 03209 TGL 09 06 2022 AN | SHGB NO 03208 TGL 16 06 2022 AN | SHM NO 00102 TGL 06 01 1992 AN BINNA | Tanah | Tanah | Tanah | Rumah | Tanah | Tanah | Tanah | Rumah
+       Fasilitas=Investasi | Kol=1 | Agunan=6 SHM | SHGB NO 03209 TGL 09 06 2022 AN, SHGB NO 03208 TGL 16 06 2022 AN | 6 Tanah | Rumah (2)
   [1] Pelapor: 114 - PT BPD Jawa Timur
        Fasilitas=Investasi | Kol=1 | Agunan=-
   [2] Pelapor: 602685 - PT Bank Perekonomian Rakyat Asia Sejahtera
